@@ -12,29 +12,31 @@ export default function Login({ onLogin }) {
 
     try {
       const formData = new FormData();
-      formData.append("email", email);
+      formData.append("username", email); // 🔑 FastAPI OAuth2 expects `username`
       formData.append("password", password);
 
-      const res = await fetch("https://audio-gen-backend-o6nr.onrender.com/token", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://audio-gen-backend-o6nr.onrender.com/token",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json(); // ✅ only once
 
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
         throw new Error(data?.detail || "Login failed");
       }
 
-      const data = await res.json();
-
       const user = {
         email,
-        is_admin: data.is_admin || false, // Make sure backend sends is_admin
-        token: data.access_token,
+        is_admin: data.is_admin || false, // backend must send this
+        token: data.access_token, // ✅ now stored correctly
       };
 
       saveCurrentUser(user);
-      onLogin(user); // update App.jsx state
+      onLogin(user);
 
     } catch (err) {
       setError(err.message);
@@ -46,10 +48,20 @@ export default function Login({ onLogin }) {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         <br />
         <label>Password:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         <br />
         <button type="submit">Login</button>
       </form>
