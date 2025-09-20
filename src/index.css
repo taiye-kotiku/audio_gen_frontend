@@ -1,0 +1,65 @@
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f7f9fc;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  color: #1e293b;
+}
+
+.login-container, .dashboard-container, .admin-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+input, button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+button {
+  background-color: #4f46e5;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #4338ca;
+}
+
+.progress-bar {
+  margin-top: 15px;
+  width: 100%;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  position: relative;
+}
+
+.progress-bar .progress {
+  background: #4f46e5;
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.audio-result {
+  margin-top: 15px;
+}
+.error {
+  color: red;
+  margin-top: 10px;
+}
