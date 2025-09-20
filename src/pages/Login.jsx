@@ -12,7 +12,7 @@ export default function Login({ onLogin }) {
 
     try {
       const formData = new FormData();
-      formData.append("username", email); // 🔑 FastAPI OAuth2 expects `username`
+      formData.append("email", email);   // ✅ backend expects `email`
       formData.append("password", password);
 
       const res = await fetch(
@@ -23,21 +23,24 @@ export default function Login({ onLogin }) {
         }
       );
 
-      const data = await res.json(); // ✅ only once
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.detail || "Login failed");
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : JSON.stringify(data.detail)
+        );
       }
 
       const user = {
         email,
-        is_admin: data.is_admin || false, // backend must send this
-        token: data.access_token, // ✅ now stored correctly
+        is_admin: data.is_admin || false, // make sure backend sends this
+        token: data.access_token,
       };
 
       saveCurrentUser(user);
       onLogin(user);
-
     } catch (err) {
       setError(err.message);
     }
