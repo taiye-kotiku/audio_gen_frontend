@@ -18,62 +18,70 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get("/admin/list-users/", {
+      const res = await api.get("/admin/list_users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch users");
     }
   };
 
   const handleAddUser = async () => {
     try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("is_admin", isAdmin);
-
-      await api.post("/admin/add-user/", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(
+        "/admin/add_user",
+        {
+          email,
+          password,
+          is_admin: isAdmin,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setEmail("");
       setPassword("");
       setIsAdmin(false);
       fetchUsers();
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.detail || "Failed to add user");
     }
   };
 
   const handleRemoveUser = async (userEmail) => {
     try {
-      const formData = new FormData();
-      formData.append("email", userEmail);
-
-      await api.post("/admin/remove-user/", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await api.post(
+        "/admin/remove_user",
+        { email: userEmail },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       fetchUsers();
     } catch (err) {
       console.error(err);
+      setError("Failed to remove user");
     }
   };
 
   const handleSetApiKey = async () => {
     try {
-      const formData = new FormData();
-      formData.append("api_key", apiKey);
-
-      await api.post("/admin/set-api-key/", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(
+        "/admin/set_api_key",
+        { api_key: apiKey },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       alert("API key updated successfully");
       setApiKey("");
     } catch (err) {
+      console.error(err);
       setError("Failed to update API key");
     }
   };
@@ -82,6 +90,7 @@ export default function Admin() {
     <div style={{ padding: "20px" }}>
       <h2>Admin Panel</h2>
 
+      {/* Add User Section */}
       <div style={{ marginBottom: "20px" }}>
         <h4>Add User</h4>
         <input
@@ -107,6 +116,7 @@ export default function Admin() {
         {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
 
+      {/* API Key Section */}
       <div style={{ marginBottom: "20px" }}>
         <h4>Set ElevenLabs API Key</h4>
         <input
@@ -117,6 +127,7 @@ export default function Admin() {
         <button onClick={handleSetApiKey}>Save API Key</button>
       </div>
 
+      {/* User List */}
       <div>
         <h4>Existing Users</h4>
         <ul>
