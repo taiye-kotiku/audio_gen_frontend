@@ -1,5 +1,7 @@
+// src/pages/Admin.jsx
 import React, { useState, useEffect } from "react";
 import { api } from "../utils/api.js";
+import { getCurrentUser } from "../utils/store.js"; // ✅ use helper
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -9,18 +11,18 @@ export default function Admin() {
   const [error, setError] = useState(null);
   const [apiKey, setApiKey] = useState("");
 
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const token = currentUser?.token || currentUser?.access_token;
+  const currentUser = getCurrentUser(); // ✅ consistent
+  const token = currentUser?.token;
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (token) {
+      fetchUsers();
+    }
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get("/admin/list_users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/admin/list_users");
       setUsers(res.data);
     } catch (err) {
       console.error(err);
@@ -30,17 +32,11 @@ export default function Admin() {
 
   const handleAddUser = async () => {
     try {
-      await api.post(
-        "/admin/add_user",
-        {
-          email,
-          password,
-          is_admin: isAdmin,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post("/admin/add_user", {
+        email,
+        password,
+        is_admin: isAdmin,
+      });
 
       setEmail("");
       setPassword("");
@@ -54,13 +50,7 @@ export default function Admin() {
 
   const handleRemoveUser = async (userEmail) => {
     try {
-      await api.post(
-        "/admin/remove_user",
-        { email: userEmail },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post("/admin/remove_user", { email: userEmail });
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -70,14 +60,7 @@ export default function Admin() {
 
   const handleSetApiKey = async () => {
     try {
-      await api.post(
-        "/admin/set_api_key",
-        { api_key: apiKey },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      await api.post("/admin/set_api_key", { api_key: apiKey });
       alert("API key updated successfully");
       setApiKey("");
     } catch (err) {
