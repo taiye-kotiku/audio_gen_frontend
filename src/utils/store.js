@@ -1,17 +1,17 @@
-const USER_KEY = "current_user";
+import axios from "axios";
 
-// Save user to localStorage
-export function saveCurrentUser(user) {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-}
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "https://audio-gen-backend-o6nr.onrender.com";
 
-// Get user from localStorage
-export function getCurrentUser() {
-  const user = localStorage.getItem(USER_KEY);
-  return user ? JSON.parse(user) : null;
-}
+export const api = axios.create({
+  baseURL: `${API_BASE_URL}`,
+});
 
-// Clear user from localStorage
-export function clearCurrentUser() {
-  localStorage.removeItem(USER_KEY);
-}
+api.interceptors.request.use((config) => {
+  const currentUser = JSON.parse(localStorage.getItem("current_user")); // ✅ match key
+  const token = currentUser?.token || currentUser?.access_token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
