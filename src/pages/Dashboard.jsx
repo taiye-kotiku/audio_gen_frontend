@@ -87,7 +87,7 @@ export default function FileUpload() {
         </label>
         <br />
         <label>
-          Or paste text:
+          Text Input:
           <textarea
             rows="5"
             style={{ width: "100%", marginTop: "5px" }}
@@ -97,7 +97,7 @@ export default function FileUpload() {
         </label>
         <br />
         <label>
-          Custom ID:
+          Audio Title / File Name:
           <input
             type="text"
             value={customId}
@@ -106,7 +106,7 @@ export default function FileUpload() {
         </label>
         <br />
         <label>
-          Voice ID:
+          Elevenlabs Voice ID:
           <input
             type="text"
             value={voiceId}
