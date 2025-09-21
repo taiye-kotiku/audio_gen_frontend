@@ -1,7 +1,7 @@
 // src/pages/Admin.jsx
 import React, { useState, useEffect } from "react";
 import { api } from "../utils/api.js";
-import { getCurrentUser } from "../utils/store.js"; // ✅ use helper
+import { getCurrentUser } from "../utils/store.js";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -11,7 +11,7 @@ export default function Admin() {
   const [error, setError] = useState(null);
   const [apiKey, setApiKey] = useState("");
 
-  const currentUser = getCurrentUser(); // ✅ consistent
+  const currentUser = getCurrentUser();
   const token = currentUser?.token;
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get("/admin/list_users");
+      const res = await api.get("/admin/list-users/");
       setUsers(res.data);
     } catch (err) {
       console.error(err);
@@ -32,11 +32,12 @@ export default function Admin() {
 
   const handleAddUser = async () => {
     try {
-      await api.post("/admin/add_user", {
-        email,
-        password,
-        is_admin: isAdmin,
-      });
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("is_admin", isAdmin);
+
+      await api.post("/admin/add-user/", formData);
 
       setEmail("");
       setPassword("");
@@ -50,7 +51,10 @@ export default function Admin() {
 
   const handleRemoveUser = async (userEmail) => {
     try {
-      await api.post("/admin/remove_user", { email: userEmail });
+      const formData = new FormData();
+      formData.append("email", userEmail);
+
+      await api.post("/admin/remove-user/", formData);
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -60,7 +64,10 @@ export default function Admin() {
 
   const handleSetApiKey = async () => {
     try {
-      await api.post("/admin/set_api_key", { api_key: apiKey });
+      const formData = new FormData();
+      formData.append("api_key", apiKey);
+
+      await api.post("/admin/set-api-key/", formData);
       alert("API key updated successfully");
       setApiKey("");
     } catch (err) {
