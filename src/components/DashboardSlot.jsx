@@ -77,31 +77,31 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
     }
   };
 
-  const statusColors = {
+  const statusStyles = {
     ready: "bg-gray-200 text-gray-700",
-    generating: "bg-[#4A3AFF] text-white",
-    completed: "bg-[#00BFA6] text-white",
-    error: "bg-[#E63946] text-white",
+    generating: "bg-blue-600 text-white animate-pulse",
+    completed: "bg-green-500 text-white",
+    error: "bg-red-500 text-white",
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#4A3AFF] to-[#6A5AFF] h-12 flex items-center px-4">
-        <span className="bg-white text-[#4A3AFF] font-bold w-6 h-6 flex items-center justify-center rounded-full text-sm mr-3">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-12 flex items-center px-4">
+        <span className="bg-white text-blue-600 font-bold w-6 h-6 flex items-center justify-center rounded-full text-sm mr-3">
           {slotId}
         </span>
         <h2 className="text-white font-semibold text-lg">Dashboard Slot {slotId}</h2>
       </div>
 
       {/* Content */}
-      <div className="p-6 flex flex-col gap-4">
-        {/* Textbox */}
+      <div className="p-6 flex flex-col gap-5 flex-grow">
+        {/* Text Input */}
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">Text Input</label>
           <textarea
-            className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#4A3AFF] outline-none"
-            rows={5}
+            className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
+            rows={4}
             placeholder="Enter your text here..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -112,10 +112,10 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">Upload File</label>
           <div
-            className={`border-2 rounded-xl p-6 text-center cursor-pointer transition ${
+            className={`border-2 rounded-xl p-5 text-center text-sm cursor-pointer transition ${
               dragOver
-                ? "border-[#4A3AFF] bg-[#F3F0FF]"
-                : "border-dashed border-gray-300 bg-[#F9FAFB]"
+                ? "border-blue-600 bg-blue-50"
+                : "border-dashed border-gray-300 bg-gray-50"
             }`}
             onDragOver={(e) => {
               e.preventDefault();
@@ -139,7 +139,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
           <label className="block text-sm font-medium text-gray-600 mb-1">Voice ID</label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-[#4A3AFF] outline-none"
+            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-blue-600 outline-none"
             value={voiceId}
             onChange={(e) => setVoiceId(e.target.value)}
           />
@@ -150,7 +150,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
           <label className="block text-sm font-medium text-gray-600 mb-1">Custom ID</label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-[#4A3AFF] outline-none"
+            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-blue-600 outline-none"
             value={customId}
             onChange={(e) => setCustomId(e.target.value)}
           />
@@ -160,10 +160,10 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className={`w-full h-12 rounded-full font-semibold text-white shadow transition transform ${
+          className={`w-full h-12 rounded-full font-semibold text-white shadow transition ${
             isGenerating
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#4A3AFF] to-[#6A5AFF] hover:shadow-lg hover:scale-[0.99]"
+              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-95"
           }`}
         >
           {isGenerating ? "⏳ Generating..." : "🚀 Generate Audio"}
@@ -171,7 +171,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
 
         {/* Status Badge */}
         <div
-          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold self-start ${statusColors[status]}`}
+          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold self-start ${statusStyles[status]}`}
         >
           {status === "ready" && "✅ Ready"}
           {status === "generating" && "⏳ Generating..."}
@@ -187,7 +187,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
             </p>
             <div className="w-full bg-gray-200 h-2 rounded">
               <div
-                className="bg-[#4A3AFF] h-2 rounded"
+                className="bg-blue-600 h-2 rounded transition-all"
                 style={{ width: `${progress.percent}%` }}
               />
             </div>
@@ -197,11 +197,11 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
         {/* Audio Player */}
         {audioUrl && (
           <div className="mt-4">
-            <audio controls src={audioUrl} className="w-full" />
+            <audio controls src={audioUrl} className="w-full rounded-lg" />
             <a
               href={audioUrl}
               download
-              className="mt-2 block bg-[#00BFA6] text-white text-center py-2 px-4 rounded-lg hover:bg-[#00a58f] transition"
+              className="mt-3 block bg-green-500 text-white text-center py-2 px-4 rounded-lg hover:bg-green-600 transition"
             >
               ⬇️ Download
             </a>
