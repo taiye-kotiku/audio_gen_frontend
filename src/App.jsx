@@ -10,10 +10,37 @@ import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeUsers, setActiveUsers] = useState(0);
 
   useEffect(() => {
     setUser(getCurrentUser());
     setLoading(false);
+  }, []);
+
+  // Send heartbeat every 60s so backend tracks presence
+  useEffect(() => {
+    if (!user?.email) return;
+    const interval = setInterval(() => {
+      fetch("http://localhost:8000/heartbeat/", {
+        method: "POST",
+        body: new URLSearchParams({ email: user.email }),
+      }).catch(console.error);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Poll active users count every 10s
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("http://localhost:8000/admin/active-users/");
+        const data = await res.json();
+        setActiveUsers(data.count || 0);
+      } catch (err) {
+        console.error("Failed to fetch active users:", err);
+      }
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -46,6 +73,19 @@ export default function App() {
           <h2 style={{ margin: 0 }}>Audio Generator App</h2>
           {user && (
             <nav style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              {/* Active Users Count */}
+              <span
+                style={{
+                  background: "green",
+                  padding: "5px 10px",
+                  borderRadius: "20px",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                }}
+              >
+                🟢 {activeUsers} Active
+              </span>
+
               <span>{user.email}</span>
               <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
                 Dashboard
