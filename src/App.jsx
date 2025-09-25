@@ -1,11 +1,12 @@
 // src/App.jsx
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import History from "./pages/History";
 import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
+import Header from "./components/Header"; // Import the new component
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -59,61 +60,10 @@ export default function App() {
   return (
     <Router>
       <div>
-        {/* Top Navigation */}
-        <header
-          style={{
-            padding: "10px 20px",
-            background: "#222",
-            color: "#fff",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2 style={{ margin: 0 }}>Audio Generator App</h2>
-          {user && (
-            <nav style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              {/* Active Users Count */}
-              <span
-                style={{
-                  background: "green",
-                  padding: "5px 10px",
-                  borderRadius: "20px",
-                  fontSize: "0.9rem",
-                  fontWeight: "bold",
-                }}
-              >
-                🟢 {activeUsers} Active
-              </span>
-
-              <span>{user.email}</span>
-              <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
-                Dashboard
-              </Link>
-              <Link to="/history" style={{ color: "#fff", textDecoration: "none" }}>
-                History
-              </Link>
-              {user.is_admin && (
-                <Link to="/admin" style={{ color: "#fff", textDecoration: "none" }}>
-                  Admin
-                </Link>
-              )}
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "red",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "5px",
-                  padding: "5px 10px",
-                  cursor: "pointer",
-                }}
-              >
-                Logout
-              </button>
-            </nav>
-          )}
-        </header>
+        {/* === REPLACEMENT START === */}
+        {/* Replace the old header with the new Header component */}
+        <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
+        {/* === REPLACEMENT END === */}
 
         {/* Routes */}
         <Routes>
