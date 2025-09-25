@@ -1,23 +1,20 @@
+// src/components/DashboardSlot.jsx
 import React, { useState, useEffect } from "react";
-import { getCurrentUser, saveCurrentUser } from "../utils/store.js";
+import { getCurrentUser } from "../utils/store.js";
 
 function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
-  const [voiceId, setVoiceId] = useState(
-    savedVoiceId || getCurrentUser()?.voice_id || ""
-  );
+  const [voiceId, setVoiceId] = useState(savedVoiceId || getCurrentUser()?.voice_id || "");
   const [customId, setCustomId] = useState(`slot${slotId}_${Date.now()}`);
   const [progress, setProgress] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const currentUser = getCurrentUser();
 
-  // Persist voiceId
+  // Update parent voiceId
   useEffect(() => {
-    if (voiceId) {
-      onVoiceIdChange(voiceId);
-    }
+    if (voiceId) onVoiceIdChange(voiceId);
   }, [voiceId]);
 
   const handleGenerate = async () => {
@@ -61,9 +58,6 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
             clearInterval(poll);
             setIsGenerating(false);
             setAudioUrl(`${apiBaseUrl}/outputs/${customId}.mp3`);
-
-            const updatedUser = { ...currentUser, voice_id: voiceId };
-            saveCurrentUser(updatedUser);
           }
         }
       }, 2000);
@@ -75,16 +69,19 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
   };
 
   return (
-    <div className="p-6 border rounded-xl shadow-lg bg-white flex flex-col gap-4 hover:shadow-xl transition">
-      <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 flex flex-col gap-4">
+      {/* Title */}
+      <h2 className="font-bold text-xl text-gray-800 flex items-center gap-2">
         🎛️ Dashboard Slot {slotId}
       </h2>
 
-      {/* Text Input */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-600">Text Input</label>
+      {/* Textbox */}
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Text Input
+        </label>
         <textarea
-          className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
           rows={5}
           placeholder="Enter your text here..."
           value={text}
@@ -93,62 +90,68 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
       </div>
 
       {/* File Upload */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-600">Upload File</label>
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Upload File
+        </label>
         <input
           type="file"
           accept=".txt"
           onChange={(e) => setFile(e.target.files[0])}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 
-                     file:px-4 file:rounded-full file:border-0
-                     file:text-sm file:font-semibold
-                     file:bg-blue-50 file:text-blue-700
-                     hover:file:bg-blue-100 cursor-pointer"
+          className="w-full border border-gray-300 rounded-lg p-2 cursor-pointer"
         />
       </div>
 
       {/* Voice ID */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-600">Voice ID</label>
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Voice ID
+        </label>
         <input
           type="text"
-          className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          placeholder="Enter Voice ID"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+          placeholder="Voice ID"
           value={voiceId}
           onChange={(e) => setVoiceId(e.target.value)}
         />
       </div>
 
-      {/* Custom ID (optional, can be hidden if not needed) */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-600">Custom ID</label>
+      {/* Custom ID */}
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Custom ID
+        </label>
         <input
           type="text"
-          className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+          placeholder="Custom ID"
           value={customId}
           onChange={(e) => setCustomId(e.target.value)}
         />
       </div>
 
-      {/* Action Button */}
+      {/* Generate Button */}
       <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="bg-blue-600 text-white py-2 px-4 rounded-lg font-medium
-                   hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className={`w-full py-3 rounded-lg font-semibold text-white transition ${
+          isGenerating
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
       >
-        {isGenerating ? "⏳ Generating..." : "Generate Audio"}
+        {isGenerating ? "⏳ Generating..." : "🚀 Generate Audio"}
       </button>
 
       {/* Progress Bar */}
       {progress && (
-        <div className="space-y-1">
-          <p className="text-sm text-gray-600">
+        <div className="mt-2">
+          <p className="text-sm text-gray-600 mb-1">
             {progress.done}/{progress.total} chunks ({progress.percent}%)
           </p>
-          <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+          <div className="w-full bg-gray-200 h-2 rounded">
             <div
-              className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+              className="bg-blue-600 h-2 rounded"
               style={{ width: `${progress.percent}%` }}
             />
           </div>
@@ -157,8 +160,15 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
 
       {/* Audio Player */}
       {audioUrl && (
-        <div className="mt-2">
-          <audio controls src={audioUrl} className="w-full rounded-lg" />
+        <div className="mt-4">
+          <audio controls src={audioUrl} className="w-full" />
+          <a
+            href={audioUrl}
+            download
+            className="mt-2 block bg-green-600 text-white text-center py-2 px-4 rounded-lg hover:bg-green-700 transition"
+          >
+            ⬇️ Download
+          </a>
         </div>
       )}
     </div>
