@@ -1,14 +1,18 @@
 // src/components/DashboardSlot.jsx
 import React, { useState, useEffect } from "react";
+import { getCurrentUser } from "../utils/store.js";
+
 
 function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
-  const [voiceId, setVoiceId] = useState(savedVoiceId || "");
+  const [voiceId, setVoiceId] = useState(savedVoiceId || getCurrentUser()?.voice_id || "");
   const [customId, setCustomId] = useState(`slot${slotId}_${Date.now()}`);
   const [progress, setProgress] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const currentUser = getCurrentUser();
+
 
   // Update parent voiceId for persistence
   useEffect(() => {
@@ -25,6 +29,9 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
     const formData = new FormData();
     formData.append("custom_id", customId);
     formData.append("voice_id", voiceId || "6sFKzaJr574YWVu4UuJF");
+    if (currentUser?.email) {
+        formData.append("email", currentUser.email); // ✅ backend needs this
+    }
 
     if (text.trim()) {
       const blob = new Blob([text], { type: "text/plain" });
@@ -57,6 +64,8 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
             clearInterval(poll);
             setIsGenerating(false);
             setAudioUrl(`${apiBaseUrl}/outputs/${customId}.mp3`);
+            const updatedUser = { ...currentUser, voice_id: voiceId };
+            saveCurrentUser(updatedUser);
           }
         }
       }, 2000);

@@ -37,6 +37,7 @@ export default function Login({ onLogin }) {
         email,
         is_admin: data.is_admin || false, // make sure backend sends this
         token: data.access_token,
+        voice_id: data.voice_id || "6sFKzaJr574YWVu4UuJF",
       };
 
       saveCurrentUser(user);
