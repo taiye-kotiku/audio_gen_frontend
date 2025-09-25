@@ -1,6 +1,7 @@
 // src/components/DashboardSlot.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { getCurrentUser } from "../utils/store.js";
+import "./DashboardSlot.css"; // Optional: For styles specific to this component, like the file dropzone
 
 function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
   const [text, setText] = useState("");
@@ -17,7 +18,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
 
   useEffect(() => {
     if (voiceId) onVoiceIdChange(voiceId);
-  }, [voiceId]);
+  }, [voiceId, onVoiceIdChange]);
 
   const handleFileDrop = (e) => {
     e.preventDefault();
@@ -25,6 +26,10 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
     if (e.dataTransfer.files.length > 0) {
       setFile(e.dataTransfer.files[0]);
     }
+  };
+  
+  const handleFileClick = () => {
+    document.getElementById(`file-input-${slotId}`).click();
   };
 
   const handleGenerate = async () => {
@@ -74,136 +79,111 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
       console.error(err);
       setIsGenerating(false);
       setStatus("error");
+      // Clean up polling on error
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+      }
     }
   };
 
-  const statusStyles = {
-    ready: "bg-gray-200 text-gray-700",
-    generating: "bg-blue-600 text-white animate-pulse",
-    completed: "bg-green-500 text-white",
-    error: "bg-red-500 text-white",
+  const getStatusContent = () => {
+    switch (status) {
+      case "generating":
+        return <><span className="status-icon"></span>Generating...</>;
+      case "completed":
+        return <>✅ Completed</>;
+      case "error":
+        return <>❌ Error</>;
+      case "ready":
+      default:
+        return <>✅ Ready</>;
+    }
+  };
+
+  const getStatusClass = () => {
+    switch (status) {
+      case 'generating':
+        return 'status-generating';
+      case 'completed':
+        return 'status-completed';
+      case 'error':
+        return 'status-error';
+      default:
+        return 'status-ready';
+    }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-14 flex items-center px-5">
-        <span className="bg-white text-blue-600 font-bold w-7 h-7 flex items-center justify-center rounded-full text-sm mr-3 shadow">
-          {slotId}
-        </span>
-        <h2 className="text-white font-semibold text-lg">Dashboard Slot {slotId}</h2>
-      </div>
-
-      {/* Content */}
-      <div className="p-6 flex flex-col gap-5 flex-grow">
-        {/* Text Input */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Text Input</label>
-          <textarea
-            className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-            rows={4}
-            placeholder="Enter your text here..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-        </div>
-
-        {/* File Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Upload File</label>
-          <div
-            className={`border-2 rounded-xl p-5 text-center text-sm cursor-pointer transition ${
-              dragOver
-                ? "border-blue-600 bg-blue-50"
-                : "border-dashed border-gray-300 bg-gray-50"
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleFileDrop}
-          >
-            📂 {file ? file.name : "Drag & drop file here or click to upload"}
-            <input
-              type="file"
-              accept=".txt"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="hidden"
-            />
-          </div>
-        </div>
-
-        {/* Voice ID */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Voice ID</label>
+    <div className="slot-card">
+      <div className="slot-header">Dashboard Slot {slotId}</div>
+      <div className="slot-body">
+        <label>Text Input</label>
+        <textarea
+          placeholder="Enter your text here..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        
+        <div
+          className={`file-dropzone ${dragOver ? "drag-over" : ""}`}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleFileDrop}
+          onClick={handleFileClick}
+        >
+          <span>☁️ Drag & drop or click to upload</span>
           <input
-            type="text"
-            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-blue-600 outline-none"
-            value={voiceId}
-            onChange={(e) => setVoiceId(e.target.value)}
+            id={`file-input-${slotId}`}
+            type="file"
+            accept=".txt"
+            onChange={(e) => setFile(e.target.files[0])}
+            style={{ display: "none" }}
           />
         </div>
+        {file && <p className="file-name">Selected: {file.name}</p>}
 
-        {/* Custom ID */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Custom ID</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-xl h-11 px-3 focus:ring-2 focus:ring-blue-600 outline-none"
-            value={customId}
-            onChange={(e) => setCustomId(e.target.value)}
-          />
-        </div>
+        <label>Voice ID</label>
+        <input
+          type="text"
+          value={voiceId}
+          onChange={(e) => setVoiceId(e.target.value)}
+        />
 
-        {/* Generate Button */}
+        <label>Custom ID</label>
+        <input
+          type="text"
+          value={customId}
+          onChange={(e) => setCustomId(e.target.value)}
+        />
+
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className={`w-full h-12 rounded-full font-semibold text-white shadow transition ${
-            isGenerating
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-95"
-          }`}
+          className="slot-button"
         >
-          {isGenerating ? "⏳ Generating..." : "🚀 Generate Audio"}
+          {isGenerating ? "Generate..." : "Generate Audio"}
         </button>
 
-        {/* Status Badge */}
-        <div
-          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold self-start ${statusStyles[status]}`}
-        >
-          {status === "ready" && "✅ Ready"}
-          {status === "generating" && "⏳ Generating..."}
-          {status === "completed" && "🎧 Completed"}
-          {status === "error" && "❌ Error"}
+        <div className={`status-badge ${getStatusClass()}`}>
+          {getStatusContent()}
         </div>
 
-        {/* Progress Bar */}
-        {progress && (
-          <div>
-            <p className="text-xs text-gray-500 mb-1">
-              {progress.done}/{progress.total} chunks ({progress.percent}%)
-            </p>
-            <div className="w-full bg-gray-200 h-2 rounded">
+        {progress && isGenerating && (
+          <div className="progress-container">
+            <div className="progress-bar">
               <div
-                className="bg-blue-600 h-2 rounded transition-all"
+                className="progress-fill"
                 style={{ width: `${progress.percent}%` }}
               />
             </div>
           </div>
         )}
 
-        {/* Audio Player */}
         {audioUrl && (
-          <div className="mt-4">
-            <audio controls src={audioUrl} className="w-full rounded-lg" />
-            <a
-              href={audioUrl}
-              download
-              className="mt-3 block bg-green-500 text-white text-center py-2 px-4 rounded-lg hover:bg-green-600 transition"
-            >
-              ⬇️ Download
+          <div className="audio-result">
+            <audio controls src={audioUrl} className="w-full" />
+            <a href={audioUrl} download className="download-link">
+              Download Audio
             </a>
           </div>
         )}
