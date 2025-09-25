@@ -1,0 +1,141 @@
+.dashboard-wrapper {
+  min-height: 100vh;
+  background: #f7f9fc;
+  padding: 40px;
+  font-family: Inter, sans-serif;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.dashboard-header p {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* Slot card base style */
+.slot-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slot-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.slot-header {
+  background: linear-gradient(90deg, #4a3aff, #6a5aff);
+  color: #fff;
+  padding: 14px 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slot-body {
+  padding: 20px;
+}
+
+.slot-body label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.slot-body input,
+.slot-body textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.slot-body textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.slot-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #4a3aff, #6a5aff);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.slot-button:hover {
+  background: linear-gradient(90deg, #4338ca, #5b4be0);
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-ready {
+  background: #e2e8f0;
+  color: #475569;
+}
+.status-generating {
+  background: #4a3aff;
+  color: #fff;
+}
+.status-completed {
+  background: #00bfa6;
+  color: #fff;
+}
+.status-error {
+  background: #e63946;
+  color: #fff;
+}
+
+.progress-container {
+  margin-top: 12px;
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #4a3aff;
+  transition: width 0.3s ease;
+}

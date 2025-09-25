@@ -87,8 +87,8 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-12 flex items-center px-4">
-        <span className="bg-white text-blue-600 font-bold w-6 h-6 flex items-center justify-center rounded-full text-sm mr-3">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-14 flex items-center px-5">
+        <span className="bg-white text-blue-600 font-bold w-7 h-7 flex items-center justify-center rounded-full text-sm mr-3 shadow">
           {slotId}
         </span>
         <h2 className="text-white font-semibold text-lg">Dashboard Slot {slotId}</h2>
@@ -156,7 +156,7 @@ function DashboardSlot({ slotId, apiBaseUrl, savedVoiceId, onVoiceIdChange }) {
           />
         </div>
 
-        {/* Button */}
+        {/* Generate Button */}
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
