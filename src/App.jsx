@@ -22,27 +22,28 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  // === Heartbeat (tracks active sessions) ===
-  useEffect(() => {
-    if (!user?.email || !user?.access_token) return;
+// === Heartbeat (tracks active sessions) ===
+useEffect(() => {
+  if (!user?.email || !user?.access_token) return;
 
-    const sendHeartbeat = () => {
-      fetch(`${API_BASE_URL}/heartbeat/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          email: user.email,
-          token: user.access_token, // 👈 IMPORTANT: send token so backend counts sessions
-        }),
-      }).catch(console.error);
-    };
+  const sendHeartbeat = () => {
+    fetch(`${API_BASE_URL}/heartbeat/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        email: user.email,
+        token: user.access_token, // 👈 required for session tracking
+      }),
+    }).catch(console.error);
+  };
 
-    sendHeartbeat(); // immediate on mount
-    const interval = setInterval(sendHeartbeat, 3000); // every 30s
-    return () => clearInterval(interval);
-  }, [user]);
+  sendHeartbeat(); // immediate on mount
+  const interval = setInterval(sendHeartbeat, 30000); // ✅ every 30s
+  return () => clearInterval(interval);
+}, [user]);
+
 
   // === Poll active users count ===
   useEffect(() => {
