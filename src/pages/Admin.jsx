@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../utils/api.js";
 import { getCurrentUser } from "../utils/store.js";
-import "./Admin.css"; // Import the new stylesheet
+import "./Admin.css"; // Import the stylesheet
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -14,16 +14,77 @@ export default function Admin() {
   const currentUser = getCurrentUser();
   const token = currentUser?.token;
 
+  // This useEffect hook calls fetchUsers when the component mounts (if a token exists)
   useEffect(() => {
     if (token) {
       fetchUsers();
     }
   }, [token]);
 
-  const fetchUsers = async () => { /* ... (logic from Admin.jsx) */ };
-  const handleAddUser = async () => { /* ... (logic from Admin.jsx) */ };
-  const handleRemoveUser = async (userEmail) => { /* ... (logic from Admin.jsx) */ };
-  const handleSetApiKey = async () => { /* ... (logic from Admin.jsx) */ };
+  // Fetches the list of users from the API
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/admin/list-users/");
+      setUsers(res.data); // Updates the 'users' state with the fetched data
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch users");
+    }
+  };
+
+  // Handles adding a new user
+  const handleAddUser = async () => {
+    setError(null); // Reset error state
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("is_admin", isAdmin);
+
+      await api.post("/admin/add-user/", formData);
+
+      setEmail("");
+      setPassword("");
+      setIsAdmin(false);
+      fetchUsers(); // Refreshes the user list after adding a new one
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || "Failed to add user");
+    }
+  };
+
+  // Handles removing an existing user
+  const handleRemoveUser = async (userEmail) => {
+    if (window.confirm(`Are you sure you want to remove ${userEmail}?`)) {
+        setError(null);
+        try {
+            const formData = new FormData();
+            formData.append("email", userEmail);
+
+            await api.post("/admin/remove-user/", formData);
+            fetchUsers(); // Refreshes the user list
+        } catch (err) {
+            console.error(err);
+            setError("Failed to remove user");
+        }
+    }
+  };
+
+  // Handles setting the API key
+  const handleSetApiKey = async () => {
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("api_key", apiKey);
+
+      await api.post("/admin/set-api-key/", formData);
+      alert("API key updated successfully");
+      setApiKey("");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update API key");
+    }
+  };
 
   // Helper for SVG Icons
   const Icon = ({ path }) => (
@@ -57,7 +118,7 @@ export default function Admin() {
           </div>
           
           <div className="toggle-group">
-            <label>User Role</label>
+            <label>Set as Admin</label>
             <label className="toggle-switch">
               <input type="checkbox" checked={isAdmin} onChange={() => setIsAdmin(!isAdmin)} />
               <span className="toggle-slider"></span>
@@ -93,7 +154,7 @@ export default function Admin() {
           <div>Role</div>
           <div style={{ justifySelf: 'end' }}>Action</div>
         </div>
-        {users.map((u) => (
+        {users.length > 0 ? users.map((u) => (
           <div key={u.email} className="user-list-row">
             <div>{u.email}</div>
             <div>
@@ -105,7 +166,7 @@ export default function Admin() {
               <Icon path="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.528ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Zm2.522.47a.5.5 0 0 1 .528.528l-.5 8.5a.5.5 0 0 1-.998-.06l.5-8.5a.5.5 0 0 1 .47-.528Z" />
             </button>
           </div>
-        ))}
+        )) : <div style={{textAlign: 'center', padding: '1rem', color: '#64748b'}}>No users found.</div>}
       </div>
     </div>
   );
