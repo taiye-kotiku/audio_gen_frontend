@@ -6,52 +6,50 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import History from "./pages/History";
 import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
-import Header from "./components/Header"; // New Header component
+import Header from "./components/Header";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState(0);
 
-  const API_BASE_URL = "https://audio-gen-backend-o6nr.onrender.com"; 
+  // 👇 use deployed backend by default
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://audio-gen-backend-o6nr.onrender.com";
 
   useEffect(() => {
     setUser(getCurrentUser());
     setLoading(false);
   }, []);
 
-  // Send heartbeat every 30s so backend tracks presence
+  // === Heartbeat ===
   useEffect(() => {
-    if (!user?.access_token) return;
+    if (!user?.email) return;
 
     const sendHeartbeat = () => {
-      fetch("${API_BASE_URL}/heartbeat/", {
+      fetch(`${API_BASE_URL}/heartbeat/`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${user.access_token}`,
+          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}),
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ email: user.email }),
       }).catch(console.error);
     };
 
-    // Send immediately once on load
-    sendHeartbeat();
-
-    const interval = setInterval(sendHeartbeat, 30000);
+    sendHeartbeat(); // first ping
+    const interval = setInterval(sendHeartbeat, 30000); // every 30s
     return () => clearInterval(interval);
   }, [user]);
 
-  // Poll active users count every 10s
+  // === Active Users Poll ===
   useEffect(() => {
     if (!user?.access_token) return;
 
     const fetchActiveUsers = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
-          headers: {
-            Authorization: `Bearer ${user.access_token}`,
-          },
+          headers: { Authorization: `Bearer ${user.access_token}` },
         });
         if (res.ok) {
           const data = await res.json();
@@ -62,8 +60,8 @@ export default function App() {
       }
     };
 
-    fetchActiveUsers(); // call once immediately
-    const interval = setInterval(fetchActiveUsers, 10000);
+    fetchActiveUsers(); // once at mount
+    const interval = setInterval(fetchActiveUsers, 10000); // every 10s
     return () => clearInterval(interval);
   }, [user]);
 
@@ -83,10 +81,8 @@ export default function App() {
   return (
     <Router>
       <div>
-        {/* Top Header with active users badge */}
         <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
 
-        {/* Routes */}
         <Routes>
           <Route
             path="/login"
