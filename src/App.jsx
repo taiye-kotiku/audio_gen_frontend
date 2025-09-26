@@ -24,7 +24,14 @@ export default function App() {
 
 // === Heartbeat (track sessions per token) ===
 useEffect(() => {
-  if (!user?.email) return; // only require email, not access_token
+  if (!user?.email) return;
+
+  // 🔑 persist token per browser/tab
+  let sessionToken = localStorage.getItem("session_token");
+  if (!sessionToken) {
+    sessionToken = crypto.randomUUID();
+    localStorage.setItem("session_token", sessionToken);
+  }
 
   const sendHeartbeat = () => {
     fetch(`${API_BASE_URL}/heartbeat/`, {
@@ -34,15 +41,16 @@ useEffect(() => {
       },
       body: new URLSearchParams({
         email: user.email,
-        token: user.access_token || crypto.randomUUID(), // ✅ always send token
+        token: sessionToken, // ✅ stable per tab
       }),
     }).catch(console.error);
   };
 
-  sendHeartbeat(); // fire once on mount
-  const interval = setInterval(sendHeartbeat, 30000); // ✅ every 30s
+  sendHeartbeat(); // first ping
+  const interval = setInterval(sendHeartbeat, 30000); // every 30s
   return () => clearInterval(interval);
 }, [user]);
+
 
 
 
