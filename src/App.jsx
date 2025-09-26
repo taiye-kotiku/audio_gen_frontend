@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import History from "./pages/History";
 import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
-import Header from "./components/Header"; // Import the new component
+import Header from "./components/Header"; // New Header component
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -18,31 +18,52 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  // Send heartbeat every 60s so backend tracks presence
+  // Send heartbeat every 30s so backend tracks presence
   useEffect(() => {
-    if (!user?.email) return;
-    const interval = setInterval(() => {
+    if (!user?.access_token) return;
+
+    const sendHeartbeat = () => {
       fetch("http://localhost:8000/heartbeat/", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${user.access_token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
         body: new URLSearchParams({ email: user.email }),
       }).catch(console.error);
-    }, 60000);
+    };
+
+    // Send immediately once on load
+    sendHeartbeat();
+
+    const interval = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
   // Poll active users count every 10s
   useEffect(() => {
-    const interval = setInterval(async () => {
+    if (!user?.access_token) return;
+
+    const fetchActiveUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/admin/active-users/");
-        const data = await res.json();
-        setActiveUsers(data.count || 0);
+        const res = await fetch("http://localhost:8000/admin/active-users/", {
+          headers: {
+            Authorization: `Bearer ${user.access_token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setActiveUsers(data.count || 0);
+        }
       } catch (err) {
         console.error("Failed to fetch active users:", err);
       }
-    }, 10000);
+    };
+
+    fetchActiveUsers(); // call once immediately
+    const interval = setInterval(fetchActiveUsers, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
     clearCurrentUser();
@@ -60,10 +81,8 @@ export default function App() {
   return (
     <Router>
       <div>
-        {/* === REPLACEMENT START === */}
-        {/* Replace the old header with the new Header component */}
+        {/* Top Header with active users badge */}
         <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
-        {/* === REPLACEMENT END === */}
 
         {/* Routes */}
         <Routes>
@@ -95,10 +114,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="*"
-            element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-          />
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
         </Routes>
       </div>
     </Router>
