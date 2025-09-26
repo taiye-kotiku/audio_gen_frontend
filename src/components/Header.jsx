@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import "./Header.css";
@@ -24,10 +23,13 @@ function Header({ user, activeUsers, onLogout }) {
           </div>
 
           <div className="user-info">
-             <div className="active-users-badge">
-              <span className="active-dot"></span>
-              {activeUsers} Active
-            </div>
+            {/* FIX: Conditionally render badge for admins only */}
+            {user.is_admin && (
+              <div className="active-users-badge">
+                <span className="active-dot"></span>
+                {activeUsers} Active
+              </div>
+            )}
             <span>{user.email}</span>
             <button onClick={onLogout} className="logout-btn">
               Logout

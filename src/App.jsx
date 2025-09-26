@@ -13,9 +13,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState(0);
 
-  // 👇 Use deployed backend unless overridden
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://audio-gen-backend-o6nr.onrender.com";
+  // Hardcode API_BASE_URL to avoid the 'import.meta' compilation issue.
+  const API_BASE_URL = "https://audio-gen-backend-o6nr.onrender.com";
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -52,20 +51,26 @@ useEffect(() => {
 }, [user]);
 
 
-
-
-  // === Poll active users count ===
+  // === Poll active users count (Admin Only) ===
   useEffect(() => {
-    if (!user?.access_token) return;
+    // CRITICAL: Only poll the sensitive /admin/active-users/ endpoint if the user is an admin.
+    if (!user?.access_token || !user.is_admin) {
+      return; 
+    }
 
     const fetchActiveUsers = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
           headers: { Authorization: `Bearer ${user.access_token}` },
         });
+        
         if (res.ok) {
           const data = await res.json();
           setActiveUsers(data.count || 0);
+        } else if (res.status === 403 || res.status === 401) {
+          // Stop polling if admin token becomes invalid
+          console.warn("Admin authorization failed during poll. Stopping fetch.");
+          setActiveUsers(0);
         }
       } catch (err) {
         console.error("Failed to fetch active users:", err);
@@ -74,7 +79,9 @@ useEffect(() => {
 
     fetchActiveUsers(); // once immediately
     const interval = setInterval(fetchActiveUsers, 10000); // every 10s
-    return () => clearInterval(interval);
+    
+    // Cleanup function to clear the interval when the component unmounts or user changes
+    return () => clearInterval(interval); 
   }, [user]);
 
   const handleLogout = () => {
