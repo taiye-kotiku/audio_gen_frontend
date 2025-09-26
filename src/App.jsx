@@ -22,9 +22,9 @@ export default function App() {
     setLoading(false);
   }, []);
 
-// === Heartbeat (tracks active sessions) ===
+// === Heartbeat (track sessions per token) ===
 useEffect(() => {
-  if (!user?.email || !user?.access_token) return;
+  if (!user?.email) return; // only require email, not access_token
 
   const sendHeartbeat = () => {
     fetch(`${API_BASE_URL}/heartbeat/`, {
@@ -34,15 +34,16 @@ useEffect(() => {
       },
       body: new URLSearchParams({
         email: user.email,
-        token: user.access_token, // 👈 required for session tracking
+        token: user.access_token || crypto.randomUUID(), // ✅ always send token
       }),
     }).catch(console.error);
   };
 
-  sendHeartbeat(); // immediate on mount
+  sendHeartbeat(); // fire once on mount
   const interval = setInterval(sendHeartbeat, 30000); // ✅ every 30s
   return () => clearInterval(interval);
 }, [user]);
+
 
 
   // === Poll active users count ===
