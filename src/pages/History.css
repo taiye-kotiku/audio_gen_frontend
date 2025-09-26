@@ -1,0 +1,95 @@
+/* src/pages/History.css */
+.history-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.history-container h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.history-container p {
+  margin-top: 0.5rem;
+  color: #475569;
+}
+
+.history-table-wrapper {
+  margin-top: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* Ensures the border-radius is respected by the table */
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse; /* Removes space between cell borders */
+}
+
+.history-table th,
+.history-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.history-table th {
+  background-color: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.history-table audio {
+  width: 100%;
+  max-width: 300px; /* Prevents the player from becoming too large */
+  height: 40px;
+}
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #eef2ff;
+  color: #4338ca;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #64748b;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+.error-state {
+  color: #b91c1c;
+}
