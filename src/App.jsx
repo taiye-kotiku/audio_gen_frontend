@@ -40,7 +40,7 @@ export default function App() {
     };
 
     sendHeartbeat(); // immediate on mount
-    const interval = setInterval(sendHeartbeat, 30000); // every 30s
+    const interval = setInterval(sendHeartbeat, 3000); // every 30s
     return () => clearInterval(interval);
   }, [user]);
 
