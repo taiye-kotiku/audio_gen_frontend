@@ -13,7 +13,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState(0);
 
-  // Hardcode API_BASE_URL to avoid the 'import.meta' compilation issue.
   const API_BASE_URL = "https://audio-gen-backend-o6nr.onrender.com";
 
   useEffect(() => {
@@ -68,20 +67,36 @@ useEffect(() => {
           const data = await res.json();
           setActiveUsers(data.count || 0);
         } else if (res.status === 403 || res.status === 401) {
-          // Stop polling if admin token becomes invalid
+          // If the admin token fails, stop polling and reset count
           console.warn("Admin authorization failed during poll. Stopping fetch.");
           setActiveUsers(0);
+          // Return an object that signals the interval needs to be stopped
+          return { shouldStopPolling: true }; 
         }
       } catch (err) {
         console.error("Failed to fetch active users:", err);
       }
     };
 
-    fetchActiveUsers(); // once immediately
-    const interval = setInterval(fetchActiveUsers, 10000); // every 10s
+    let pollingInterval;
+
+    const startPolling = () => {
+        // Run once immediately
+        fetchActiveUsers().then(result => {
+            if (result && result.shouldStopPolling) {
+                return; // Don't start interval if initial fetch failed auth
+            }
+            // Start the interval if the initial fetch was successful or irrelevant
+            pollingInterval = setInterval(fetchActiveUsers, 10000); // every 10s
+        });
+    }
+
+    startPolling();
     
     // Cleanup function to clear the interval when the component unmounts or user changes
-    return () => clearInterval(interval); 
+    return () => {
+        if (pollingInterval) clearInterval(pollingInterval);
+    }
   }, [user]);
 
   const handleLogout = () => {
