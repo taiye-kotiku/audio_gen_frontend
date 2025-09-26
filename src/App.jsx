@@ -13,7 +13,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState(0);
 
-  // 👇 use deployed backend by default
+  // 👇 Use deployed backend unless overridden
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "https://audio-gen-backend-o6nr.onrender.com";
 
@@ -22,27 +22,29 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  // === Heartbeat ===
+  // === Heartbeat (tracks active sessions) ===
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user?.email || !user?.access_token) return;
 
     const sendHeartbeat = () => {
       fetch(`${API_BASE_URL}/heartbeat/`, {
         method: "POST",
         headers: {
-          ...(user?.access_token ? { Authorization: `Bearer ${user.access_token}` } : {}),
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({ email: user.email }),
+        body: new URLSearchParams({
+          email: user.email,
+          token: user.access_token, // 👈 IMPORTANT: send token so backend counts sessions
+        }),
       }).catch(console.error);
     };
 
-    sendHeartbeat(); // first ping
+    sendHeartbeat(); // immediate on mount
     const interval = setInterval(sendHeartbeat, 30000); // every 30s
     return () => clearInterval(interval);
   }, [user]);
 
-  // === Active Users Poll ===
+  // === Poll active users count ===
   useEffect(() => {
     if (!user?.access_token) return;
 
@@ -60,7 +62,7 @@ export default function App() {
       }
     };
 
-    fetchActiveUsers(); // once at mount
+    fetchActiveUsers(); // once immediately
     const interval = setInterval(fetchActiveUsers, 10000); // every 10s
     return () => clearInterval(interval);
   }, [user]);
