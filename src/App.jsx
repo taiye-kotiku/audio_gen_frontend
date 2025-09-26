@@ -13,6 +13,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState(0);
 
+  const API_BASE_URL = "https://audio-gen-backend-o6nr.onrender.com"; 
+
   useEffect(() => {
     setUser(getCurrentUser());
     setLoading(false);
@@ -23,7 +25,7 @@ export default function App() {
     if (!user?.access_token) return;
 
     const sendHeartbeat = () => {
-      fetch("http://localhost:8000/heartbeat/", {
+      fetch("${API_BASE_URL}/heartbeat/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${user.access_token}`,
@@ -46,7 +48,7 @@ export default function App() {
 
     const fetchActiveUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/admin/active-users/", {
+        const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
           headers: {
             Authorization: `Bearer ${user.access_token}`,
           },
