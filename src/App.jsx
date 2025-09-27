@@ -49,50 +49,57 @@ useEffect(() => {
 }, [user, API_BASE_URL]); // Added API_BASE_URL to dependencies
 
 
-// === Poll active users count (Admin Only) - CORRECTED FIX ===
+// === Poll active users count (Admin Only) - FIXED ===
 useEffect(() => {
-    // CRITICAL: Only poll the sensitive /admin/active-users/ endpoint if the user is an admin
-    if (!user?.access_token || !user.is_admin) {
-      // Reset count and stop.
+    console.log("🔄 Polling effect triggered. User:", user);
+    
+    // More specific check for admin status
+    if (!user || !user.access_token || user.is_admin !== true) {
+      console.log("❌ Stopping poll - User is not admin or no token");
       setActiveUsers(0); 
       return; 
     }
 
+    console.log("✅ User is admin, starting polling...");
+
     const fetchActiveUsers = async () => {
       try {
+        console.log("📡 Sending request to /admin/active-users/");
         const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
           headers: { Authorization: `Bearer ${user.access_token}` },
         });
         
+        console.log("📥 Response status:", res.status);
+        
         if (res.ok) {
           const data = await res.json();
-          // ✅ FIX: Set the active user count
+          console.log("✅ Active users data:", data);
           setActiveUsers(data.count || 0);
         } else if (res.status === 403 || res.status === 401) {
-          // Auth failed: clear count and allow cleanup to stop interval
-          console.warn("Admin authorization failed during poll.");
+          console.warn("❌ Admin authorization failed during poll.");
           setActiveUsers(0);
         } else {
-          console.error(`Failed to fetch active users: Status ${res.status}`);
+          console.error(`❌ Failed to fetch active users: Status ${res.status}`);
           setActiveUsers(0);
         }
       } catch (err) {
-        console.error("Network error fetching active users:", err);
+        console.error("🌐 Network error fetching active users:", err);
         setActiveUsers(0);
       }
     };
 
-    // 1. Run once immediately
+    // Immediate first call
     fetchActiveUsers();
     
-    // 2. Start the interval
-    const pollingInterval = setInterval(fetchActiveUsers, 10000); // every 10s
+    // Set up interval
+    const pollingInterval = setInterval(fetchActiveUsers, 10000);
     
-    // 3. Cleanup function to clear the interval when the user or component unmounts
+    // Cleanup
     return () => {
+      console.log("🧹 Cleaning up polling interval");
       clearInterval(pollingInterval);
-    }
-  }, [user, API_BASE_URL]);
+    };
+}, [user?.access_token, user?.is_admin, API_BASE_URL]); // ✅ Specific dependencies
 
 
   const handleLogout = () => {
