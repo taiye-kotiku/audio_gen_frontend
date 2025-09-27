@@ -49,11 +49,10 @@ useEffect(() => {
 }, [user, API_BASE_URL]); // Added API_BASE_URL to dependencies
 
 
-// === Poll active users count (Admin Only) - FIXED ===
+// === Poll active users count (Admin Only) - FORCE RE-RUN ===
 useEffect(() => {
     console.log("🔄 Polling effect triggered. User:", user);
     
-    // More specific check for admin status
     if (!user || !user.access_token || user.is_admin !== true) {
       console.log("❌ Stopping poll - User is not admin or no token");
       setActiveUsers(0); 
@@ -64,7 +63,7 @@ useEffect(() => {
 
     const fetchActiveUsers = async () => {
       try {
-        console.log("📡 Sending request to /admin/active-users/");
+        console.log("📡 Sending request to /admin/active-users/ at:", new Date().toISOString());
         const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
           headers: { Authorization: `Bearer ${user.access_token}` },
         });
@@ -73,34 +72,26 @@ useEffect(() => {
         
         if (res.ok) {
           const data = await res.json();
-          console.log("✅ Active users data:", data);
+          console.log("✅ Active users count:", data.count);
           setActiveUsers(data.count || 0);
-        } else if (res.status === 403 || res.status === 401) {
-          console.warn("❌ Admin authorization failed during poll.");
-          setActiveUsers(0);
         } else {
-          console.error(`❌ Failed to fetch active users: Status ${res.status}`);
+          console.error(`❌ Failed: Status ${res.status}`);
           setActiveUsers(0);
         }
       } catch (err) {
-        console.error("🌐 Network error fetching active users:", err);
+        console.error("🌐 Network error:", err);
         setActiveUsers(0);
       }
     };
 
-    // Immediate first call
     fetchActiveUsers();
-    
-    // Set up interval
     const pollingInterval = setInterval(fetchActiveUsers, 10000);
     
-    // Cleanup
     return () => {
-      console.log("🧹 Cleaning up polling interval");
+      console.log("🧹 Cleaning up interval");
       clearInterval(pollingInterval);
     };
-}, [user?.access_token, user?.is_admin, API_BASE_URL]); // ✅ Specific dependencies
-
+}, [JSON.stringify(user)]); // ✅ Force re-run when user object changes
 
   const handleLogout = () => {
     clearCurrentUser();
