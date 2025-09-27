@@ -20,6 +20,7 @@
   color: #475569;
   margin-top: -10px;
   margin-bottom: 16px;
+  word-break: break-word;
 }
 
 .status-generating .status-icon {

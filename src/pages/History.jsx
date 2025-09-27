@@ -1,7 +1,7 @@
 // src/pages/History.jsx
 import React, { useEffect, useState } from "react";
 import { getCurrentUser } from "../utils/store.js";
-import "./History.css"; // Import the new stylesheet
+import "./History.css";
 
 function History() {
   const apiBaseUrl = "https://audio-gen-backend-o6nr.onrender.com";
@@ -19,7 +19,9 @@ function History() {
 
     const fetchHistory = async () => {
       try {
-        const resp = await fetch(`${apiBaseUrl}/history/${currentUser.email}`);
+        // FIX 1: Correct endpoint with email parameter
+        const resp = await fetch(`${apiBaseUrl}/user/history/?email=${encodeURIComponent(currentUser.email)}`);
+        
         if (!resp.ok) throw new Error(await resp.text());
         const data = await resp.json();
         setHistory(data);
@@ -32,7 +34,7 @@ function History() {
     };
 
     fetchHistory();
-  }, [currentUser?.email]); // Dependency added for correctness
+  }, [currentUser?.email]);
 
   if (loading) {
     return <div className="history-container"><div className="loading-state">Loading history...</div></div>;
@@ -44,7 +46,6 @@ function History() {
 
   return (
     <div className="history-container">
-      {/* Page Header */}
       <div className="mb-8">
         <h1>📜 Generation History</h1>
         <p>Here are your previously generated audio files.</p>
@@ -60,6 +61,7 @@ function History() {
                 <th>Custom ID</th>
                 <th>Voice ID</th>
                 <th>Generated At</th>
+                <th>Text Preview</th>
                 <th>Playback</th>
                 <th>Download</th>
               </tr>
@@ -74,15 +76,20 @@ function History() {
                       ? new Date(item.timestamp).toLocaleString()
                       : "Unknown"}
                   </td>
+                  <td className="text-preview">
+                    {item.text_preview || "No preview available"}
+                  </td>
                   <td>
+                    {/* FIX 2: Use the file_path from history data */}
                     <audio
                       controls
-                      src={`${apiBaseUrl}/outputs/${item.custom_id}.mp3`}
+                      src={`${apiBaseUrl}${item.file_path}`}
                     />
                   </td>
                   <td>
+                    {/* FIX 3: Use the file_path from history data */}
                     <a
-                      href={`${apiBaseUrl}/outputs/${item.custom_id}.mp3`}
+                      href={`${apiBaseUrl}${item.file_path}`}
                       download
                       className="download-btn"
                     >
