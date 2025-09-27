@@ -46,15 +46,15 @@ useEffect(() => {
   sendHeartbeat(); // first ping
   const interval = setInterval(sendHeartbeat, 30000); // every 30s
   return () => clearInterval(interval);
-}, [user, API_BASE_URL]);
+}, [user, API_BASE_URL]); // Added API_BASE_URL to dependencies
 
 
-  // === Poll active users count (Admin Only) - CORRECTED FIX ===
-  useEffect(() => {
-    // CRITICAL: Only poll the sensitive /admin/active-users/ endpoint if the user is an admin.
+// === Poll active users count (Admin Only) - CORRECTED FIX ===
+useEffect(() => {
+    // CRITICAL: Only poll the sensitive /admin/active-users/ endpoint if the user is an admin
     if (!user?.access_token || !user.is_admin) {
-      // If the user is not an admin, ensure the count is 0 and stop polling.
-      setActiveUsers(0);
+      // Reset count and stop.
+      setActiveUsers(0); 
       return; 
     }
 
@@ -69,8 +69,8 @@ useEffect(() => {
           // ✅ FIX: Set the active user count
           setActiveUsers(data.count || 0);
         } else if (res.status === 403 || res.status === 401) {
-          // If the admin token fails, reset count and let the cleanup function handle stopping the interval.
-          console.warn("Admin authorization failed during poll. User may need to re-login.");
+          // Auth failed: clear count and allow cleanup to stop interval
+          console.warn("Admin authorization failed during poll.");
           setActiveUsers(0);
         } else {
           console.error(`Failed to fetch active users: Status ${res.status}`);
@@ -93,6 +93,7 @@ useEffect(() => {
       clearInterval(pollingInterval);
     }
   }, [user, API_BASE_URL]);
+
 
   const handleLogout = () => {
     clearCurrentUser();
@@ -147,3 +148,5 @@ useEffect(() => {
     </Router>
   );
 }
+
+
