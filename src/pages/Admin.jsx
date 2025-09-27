@@ -99,7 +99,7 @@ export default function Admin() {
       
       <div className="admin-grid">
         {/* === MANAGE USERS CARD === */}
-        <div className="admin-card col-span-2">
+        <div className="admin-card">
           <h2>Manage Users</h2>
           <div className="form-group">
             <label htmlFor="email">Email address</label>
@@ -147,7 +147,7 @@ export default function Admin() {
       </div>
 
       {/* === EXISTING USERS LIST === */}
-      <div className="admin-card">
+      <div className="admin-card" style={{marginTop: '1.5rem'}}>
         <h2>Existing Users</h2>
         <div className="user-list-header">
           <div>Email</div>

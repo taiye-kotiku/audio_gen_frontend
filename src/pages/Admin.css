@@ -1,8 +1,9 @@
-/* src/pages/Admin.css */
+/* src/pages/Admin.css - UPDATED */
 .admin-panel {
   max-width: 1200px;
   margin: 2rem auto;
-  padding: 0 2rem;
+  padding: 0 1rem; /* Reduced padding for mobile */
+  box-sizing: border-box;
 }
 
 .admin-panel h1 {
@@ -10,11 +11,13 @@
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 2rem;
+  word-wrap: break-word; /* Prevent text overflow */
 }
 
+/* Responsive grid */
 .admin-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive columns */
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -24,10 +27,13 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box; /* Crucial fix */
+  min-width: 0; /* Prevent grid overflow */
 }
 
+/* Remove fixed column span for responsive design */
 .admin-card.col-span-2 {
-  grid-column: span 2 / span 2;
+  grid-column: 1 / -1; /* Take full width */
 }
 
 .admin-card h2 {
@@ -35,6 +41,7 @@
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 1.5rem;
+  word-wrap: break-word;
 }
 
 .form-group {
@@ -51,6 +58,8 @@
 
 .input-group {
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-group svg {
@@ -61,15 +70,18 @@
   color: #94a3b8;
   width: 16px;
   height: 16px;
+  z-index: 1;
 }
 
 .input-group input {
   width: 100%;
+  max-width: 100%; /* Prevent overflow */
   padding: 0.75rem 0.75rem 0.75rem 2.25rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box; /* Crucial fix */
 }
 
 .input-group input:focus {
@@ -83,6 +95,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  gap: 1rem;
 }
 
 .toggle-switch {
@@ -90,12 +104,7 @@
   display: inline-block;
   width: 50px;
   height: 28px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+  flex-shrink: 0; /* Prevent toggle from shrinking */
 }
 
 .toggle-slider {
@@ -132,6 +141,7 @@ input:checked + .toggle-slider:before {
 
 .btn {
   width: 100%;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -143,6 +153,7 @@ input:checked + .toggle-slider:before {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+  box-sizing: border-box;
 }
 
 .btn-primary {
@@ -154,13 +165,15 @@ input:checked + .toggle-slider:before {
   background-color: #4338ca;
 }
 
+/* Responsive user list */
 .user-list-header,
 .user-list-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: minmax(150px, 2fr) minmax(100px, 1fr) minmax(80px, 1fr);
   align-items: center;
   padding: 0.75rem 0;
   gap: 1rem;
+  min-width: 0; /* Prevent grid overflow */
 }
 
 .user-list-header {
@@ -175,12 +188,22 @@ input:checked + .toggle-slider:before {
   border-bottom: 1px solid #f1f5f9;
 }
 
+.user-list-row > div {
+  min-width: 0; /* Allow text truncation */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .role-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 500;
   text-align: center;
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .role-badge.admin {
@@ -200,8 +223,65 @@ input:checked + .toggle-slider:before {
   color: #94a3b8;
   padding: 0.5rem;
   justify-self: end;
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .action-btn:hover {
   color: #ef4444;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 0 0.5rem;
+    margin: 1rem auto;
+  }
+  
+  .admin-panel h1 {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+  
+  .admin-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .admin-card {
+    padding: 1rem;
+  }
+  
+  .user-list-header,
+  .user-list-row {
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .input-group input {
+    padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .toggle-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-panel h1 {
+    font-size: 1.5rem;
+  }
+  
+  .user-list-header,
+  .user-list-row {
+    grid-template-columns: 1fr auto;
+  }
+  
+  .user-list-header div:nth-child(2),
+  .user-list-row div:nth-child(2) {
+    display: none; /* Hide role column on very small screens */
+  }
 }
