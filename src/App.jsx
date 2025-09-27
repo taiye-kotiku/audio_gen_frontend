@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
@@ -47,13 +46,15 @@ useEffect(() => {
   sendHeartbeat(); // first ping
   const interval = setInterval(sendHeartbeat, 30000); // every 30s
   return () => clearInterval(interval);
-}, [user]);
+}, [user, API_BASE_URL]);
 
 
-  // === Poll active users count (Admin Only) ===
+  // === Poll active users count (Admin Only) - CORRECTED FIX ===
   useEffect(() => {
     // CRITICAL: Only poll the sensitive /admin/active-users/ endpoint if the user is an admin.
     if (!user?.access_token || !user.is_admin) {
+      // If the user is not an admin, ensure the count is 0 and stop polling.
+      setActiveUsers(0);
       return; 
     }
 
@@ -65,39 +66,33 @@ useEffect(() => {
         
         if (res.ok) {
           const data = await res.json();
+          // ✅ FIX: Set the active user count
           setActiveUsers(data.count || 0);
         } else if (res.status === 403 || res.status === 401) {
-          // If the admin token fails, stop polling and reset count
-          console.warn("Admin authorization failed during poll. Stopping fetch.");
+          // If the admin token fails, reset count and let the cleanup function handle stopping the interval.
+          console.warn("Admin authorization failed during poll. User may need to re-login.");
           setActiveUsers(0);
-          // Return an object that signals the interval needs to be stopped
-          return { shouldStopPolling: true }; 
+        } else {
+          console.error(`Failed to fetch active users: Status ${res.status}`);
+          setActiveUsers(0);
         }
       } catch (err) {
-        console.error("Failed to fetch active users:", err);
+        console.error("Network error fetching active users:", err);
+        setActiveUsers(0);
       }
     };
 
-    let pollingInterval;
-
-    const startPolling = () => {
-        // Run once immediately
-        fetchActiveUsers().then(result => {
-            if (result && result.shouldStopPolling) {
-                return; // Don't start interval if initial fetch failed auth
-            }
-            // Start the interval if the initial fetch was successful or irrelevant
-            pollingInterval = setInterval(fetchActiveUsers, 10000); // every 10s
-        });
-    }
-
-    startPolling();
+    // 1. Run once immediately
+    fetchActiveUsers();
     
-    // Cleanup function to clear the interval when the component unmounts or user changes
+    // 2. Start the interval
+    const pollingInterval = setInterval(fetchActiveUsers, 10000); // every 10s
+    
+    // 3. Cleanup function to clear the interval when the user or component unmounts
     return () => {
-        if (pollingInterval) clearInterval(pollingInterval);
+      clearInterval(pollingInterval);
     }
-  }, [user]);
+  }, [user, API_BASE_URL]);
 
   const handleLogout = () => {
     clearCurrentUser();
