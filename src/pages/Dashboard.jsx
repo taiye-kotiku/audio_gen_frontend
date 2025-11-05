@@ -5,7 +5,7 @@ import Dashboard from "./Dashboard";
 import Admin from "./Admin";
 import History from "./History";
 import { getCurrentUser, clearCurrentUser } from "../utils/store.js";
-import Header from "./components/Header";
+import Header from "../components/Header.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
