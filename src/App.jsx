@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
@@ -132,40 +132,42 @@ export default function App() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
+    <Router>
+      <div>
+        <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
 
-      <Routes>
-        <Route
-          path="/login"
-          element={!user ? <Login onLogin={setUser} /> : <Navigate to="/dashboard" replace />}
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <History />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-      </Routes>
-    </div>
+        <Routes>
+          <Route
+            path="/login"
+            element={!user ? <Login onLogin={setUser} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
