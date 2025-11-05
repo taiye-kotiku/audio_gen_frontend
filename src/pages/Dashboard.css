@@ -1,141 +1,134 @@
+/* Dashboard.css */
+
 .dashboard-wrapper {
-  min-height: 100vh;
-  background: #f7f9fc;
-  padding: 40px;
-  font-family: Inter, sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 2.5rem;
   margin-bottom: 10px;
+  color: #333;
 }
 
 .dashboard-header p {
-  color: #64748b;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  color: #666;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+/* Voice ID Quick Access Bar */
+.voice-id-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Slot card base style */
-.slot-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.slot-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
-}
-
-.slot-header {
-  background: linear-gradient(90deg, #4a3aff, #6a5aff);
-  color: #fff;
-  padding: 14px 20px;
-  font-weight: 600;
-  font-size: 1rem;
+.voice-id-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.slot-body {
-  padding: 20px;
+.voice-id-label {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  white-space: nowrap;
 }
 
-.slot-body label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #475569;
-  margin-bottom: 6px;
-  display: block;
+.voice-id-quick-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
 }
 
-.slot-body input,
-.slot-body textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+.voice-id-quick-input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
 }
 
-.slot-body textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.slot-button {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(90deg, #4a3aff, #6a5aff);
-  color: #fff;
+.voice-id-copy-btn,
+.voice-id-apply-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.slot-button:hover {
-  background: linear-gradient(90deg, #4338ca, #5b4be0);
+.voice-id-copy-btn {
+  background-color: #fff;
+  color: #667eea;
 }
 
-.status-badge {
-  display: inline-block;
+.voice-id-copy-btn:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.voice-id-apply-btn {
+  background-color: #ffd700;
+  color: #333;
+}
+
+.voice-id-apply-btn:hover {
+  background-color: #ffed4e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.voice-id-hint {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
   margin-top: 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.status-ready {
-  background: #e2e8f0;
-  color: #475569;
-}
-.status-generating {
-  background: #4a3aff;
-  color: #fff;
-}
-.status-completed {
-  background: #00bfa6;
-  color: #fff;
-}
-.status-error {
-  background: #e63946;
-  color: #fff;
-}
-
-.progress-container {
-  margin-top: 12px;
-}
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: #e2e8f0;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
-  overflow: hidden;
+  text-align: center;
 }
-.progress-fill {
-  height: 100%;
-  background: #4a3aff;
-  transition: width 0.3s ease;
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .voice-id-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .voice-id-quick-input {
+    width: 100%;
+  }
+
+  .voice-id-copy-btn,
+  .voice-id-apply-btn {
+    width: 100%;
+  }
 }

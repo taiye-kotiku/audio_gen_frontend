@@ -19,43 +19,58 @@ export default function App() {
     setLoading(false);
   }, []);
 
-// === Heartbeat (track sessions per token) ===
-useEffect(() => {
-  if (!user?.email) return;
+  // === IMPROVED Heartbeat (fixed for bookmarks) ===
+  useEffect(() => {
+    if (!user?.email) return;
 
-  // 🔑 persist token per browser/tab
-  let sessionToken = localStorage.getItem("session_token");
-  if (!sessionToken) {
-    sessionToken = crypto.randomUUID();
-    localStorage.setItem("session_token", sessionToken);
-  }
+    // 🔒 Ensure session token persists across bookmarks/refreshes
+    let sessionToken = localStorage.getItem("session_token");
+    if (!sessionToken) {
+      sessionToken = crypto.randomUUID();
+      localStorage.setItem("session_token", sessionToken);
+      console.log("✅ New session token created:", sessionToken.substring(0, 8) + "...");
+    } else {
+      console.log("✅ Using existing session token:", sessionToken.substring(0, 8) + "...");
+    }
 
-  const sendHeartbeat = () => {
-    fetch(`${API_BASE_URL}/heartbeat/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        email: user.email,
-        token: sessionToken, // ✅ stable per tab
-      }),
-    }).catch(console.error);
-  };
+    const sendHeartbeat = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/heartbeat/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            email: user.email,
+            token: sessionToken,
+          }),
+        });
+        
+        if (response.ok) {
+          console.log("💓 Heartbeat sent successfully");
+        } else {
+          console.error("❌ Heartbeat failed:", response.status);
+        }
+      } catch (error) {
+        console.error("❌ Heartbeat error:", error);
+      }
+    };
 
-  sendHeartbeat(); // first ping
-  const interval = setInterval(sendHeartbeat, 30000); // every 30s
-  return () => clearInterval(interval);
-}, [user, API_BASE_URL]); // Added API_BASE_URL to dependencies
-
-
-// === Poll active users count (Admin Only) - FIXED ===
-useEffect(() => {
-    console.log("🔄 Polling effect triggered. User:", user);
+    // Send first heartbeat immediately
+    sendHeartbeat();
     
-    // More specific check for admin status
+    // Then send every 30 seconds
+    const interval = setInterval(sendHeartbeat, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user, API_BASE_URL]);
+
+  // === Poll active users count (Admin Only) ===
+  useEffect(() => {
+    console.log("📊 Polling effect triggered. User:", user);
+    
     if (!user || !user.token || user.is_admin !== true) {
-      console.log("❌ Stopping poll - User is not admin or no token");
+      console.log("⛔ Stopping poll - User is not admin or no token");
       setActiveUsers(0); 
       return; 
     }
@@ -76,10 +91,10 @@ useEffect(() => {
           console.log("✅ Active users data:", data);
           setActiveUsers(data.count || 0);
         } else if (res.status === 403 || res.status === 401) {
-          console.warn("❌ Admin authorization failed during poll.");
+          console.warn("⛔ Admin authorization failed during poll");
           setActiveUsers(0);
         } else {
-          console.error(`❌ Failed to fetch active users: Status ${res.status}`);
+          console.error(`⛔ Failed to fetch active users: Status ${res.status}`);
           setActiveUsers(0);
         }
       } catch (err) {
@@ -99,10 +114,11 @@ useEffect(() => {
       console.log("🧹 Cleaning up polling interval");
       clearInterval(pollingInterval);
     };
-}, [user?.token, user?.is_admin, API_BASE_URL]); // ✅ Specific dependencies
-
+  }, [user?.token, user?.is_admin, API_BASE_URL]);
 
   const handleLogout = () => {
+    // Clear session token on logout
+    localStorage.removeItem("session_token");
     clearCurrentUser();
     setUser(null);
   };
@@ -155,5 +171,3 @@ useEffect(() => {
     </Router>
   );
 }
-
-
