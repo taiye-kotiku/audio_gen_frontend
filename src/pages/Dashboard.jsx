@@ -1,173 +1,112 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./Login";
-import Dashboard from "./Dashboard";
-import Admin from "./Admin";
-import History from "./History";
-import { getCurrentUser, clearCurrentUser } from "../utils/store.js";
-import Header from "../components/Header.jsx";
+import DashboardSlot from "../components/DashboardSlot";
+import "./Dashboard.css";
 
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeUsers, setActiveUsers] = useState(0);
+function Dashboard() {
+  const apiBaseUrl = "https://audio-gen-backend-o6nr.onrender.com";
+  const [savedVoiceId, setSavedVoiceId] = useState(
+    localStorage.getItem("voiceId") || ""
+  );
+  const [voiceIdHistory, setVoiceIdHistory] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render of slots
 
-  const API_BASE_URL = "https://audio-gen-backend-o6nr.onrender.com";
-
+  // Load Voice ID history from localStorage
   useEffect(() => {
-    setUser(getCurrentUser());
-    setLoading(false);
+    const history = JSON.parse(localStorage.getItem("voiceIdHistory") || "[]");
+    setVoiceIdHistory(history.slice(0, 3)); // Only keep last 3
   }, []);
 
-  // === IMPROVED Heartbeat (fixed for bookmarks) ===
-  useEffect(() => {
-    if (!user?.email) return;
+  const handleVoiceIdChange = (id) => {
+    localStorage.setItem("voiceId", id);
+    setSavedVoiceId(id);
 
-    // 🔒 Ensure session token persists across bookmarks/refreshes
-    let sessionToken = localStorage.getItem("session_token");
-    if (!sessionToken) {
-      sessionToken = crypto.randomUUID();
-      localStorage.setItem("session_token", sessionToken);
-      console.log("✅ New session token created:", sessionToken.substring(0, 8) + "...");
-    } else {
-      console.log("✅ Using existing session token:", sessionToken.substring(0, 8) + "...");
-    }
-
-    const sendHeartbeat = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/heartbeat/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            email: user.email,
-            token: sessionToken,
-          }),
-        });
-        
-        if (response.ok) {
-          console.log("💓 Heartbeat sent successfully");
-        } else {
-          console.error("❌ Heartbeat failed:", response.status);
-        }
-      } catch (error) {
-        console.error("❌ Heartbeat error:", error);
-      }
-    };
-
-    // Send first heartbeat immediately
-    sendHeartbeat();
+    // Update history
+    let history = JSON.parse(localStorage.getItem("voiceIdHistory") || "[]");
     
-    // Then send every 30 seconds
-    const interval = setInterval(sendHeartbeat, 30000);
+    // Remove duplicate if exists
+    history = history.filter(item => item.id !== id);
     
-    return () => clearInterval(interval);
-  }, [user, API_BASE_URL]);
+    // Add to beginning with timestamp
+    history.unshift({
+      id: id,
+      timestamp: new Date().toLocaleString(),
+    });
 
-  // === Poll active users count (Admin Only) ===
-  useEffect(() => {
-    console.log("📊 Polling effect triggered. User:", user);
+    // Keep only last 3
+    history = history.slice(0, 3);
     
-    if (!user || !user.token || user.is_admin !== true) {
-      console.log("⛔ Stopping poll - User is not admin or no token");
-      setActiveUsers(0); 
-      return; 
-    }
-
-    console.log("✅ User is admin, starting polling...");
-
-    const fetchActiveUsers = async () => {
-      try {
-        console.log("📡 Sending request to /admin/active-users/");
-        const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        
-        console.log("📥 Response status:", res.status);
-        
-        if (res.ok) {
-          const data = await res.json();
-          console.log("✅ Active users data:", data);
-          setActiveUsers(data.count || 0);
-        } else if (res.status === 403 || res.status === 401) {
-          console.warn("⛔ Admin authorization failed during poll");
-          setActiveUsers(0);
-        } else {
-          console.error(`⛔ Failed to fetch active users: Status ${res.status}`);
-          setActiveUsers(0);
-        }
-      } catch (err) {
-        console.error("🌐 Network error fetching active users:", err);
-        setActiveUsers(0);
-      }
-    };
-
-    // Immediate first call
-    fetchActiveUsers();
-    
-    // Set up interval
-    const pollingInterval = setInterval(fetchActiveUsers, 10000);
-    
-    // Cleanup
-    return () => {
-      console.log("🧹 Cleaning up polling interval");
-      clearInterval(pollingInterval);
-    };
-  }, [user?.token, user?.is_admin, API_BASE_URL]);
-
-  const handleLogout = () => {
-    // Clear session token on logout
-    localStorage.removeItem("session_token");
-    clearCurrentUser();
-    setUser(null);
+    localStorage.setItem("voiceIdHistory", JSON.stringify(history));
+    setVoiceIdHistory(history);
   };
 
-  const ProtectedRoute = ({ children, adminOnly = false }) => {
-    if (!user) return <Navigate to="/login" replace />;
-    if (adminOnly && !user.is_admin) return <Navigate to="/dashboard" replace />;
-    return children;
+  const useHistoryVoiceId = (voiceId) => {
+    // Update saved Voice ID
+    localStorage.setItem("voiceId", voiceId);
+    setSavedVoiceId(voiceId);
+    
+    // Force all slots to re-render with new Voice ID
+    setRefreshKey(prev => prev + 1);
+    
+    // Show confirmation
+    alert(`Voice ID "${voiceId}" applied to all slots!`);
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
-    <Router>
-      <div>
-        <Header user={user} activeUsers={activeUsers} onLogout={handleLogout} />
+    <div className="dashboard-wrapper">
+      <header className="dashboard-header">
+        <h1>🎤 Audio Generation Dashboard</h1>
+        <p>Enter your text or upload a file, choose a voice, and generate audio.</p>
+      </header>
 
-        <Routes>
-          <Route
-            path="/login"
-            element={!user ? <Login onLogin={setUser} /> : <Navigate to="/dashboard" replace />}
+      {/* Voice ID History Table */}
+      {voiceIdHistory.length > 0 && (
+        <div className="voice-history-card">
+          <h3>📋 Recent Voice IDs (Last 3)</h3>
+          <table className="voice-history-table">
+            <thead>
+              <tr>
+                <th>Voice ID</th>
+                <th>Last Used</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {voiceIdHistory.map((item, index) => (
+                <tr key={index}>
+                  <td className="voice-id-cell">{item.id}</td>
+                  <td className="timestamp-cell">{item.timestamp}</td>
+                  <td>
+                    <button
+                      className="use-btn"
+                      onClick={() => useHistoryVoiceId(item.id)}
+                      title="Apply this Voice ID to all 3 slots"
+                    >
+                      Use
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="voice-history-hint">
+            💡 Click "Use" to apply a Voice ID to all 3 generators below
+          </p>
+        </div>
+      )}
+
+      <div className="dashboard-grid">
+        {[1, 2, 3].map((slotId) => (
+          <DashboardSlot
+            key={`${slotId}-${refreshKey}`} // Force re-render when refreshKey changes
+            slotId={slotId}
+            apiBaseUrl={apiBaseUrl}
+            savedVoiceId={savedVoiceId}
+            onVoiceIdChange={handleVoiceIdChange}
           />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <History />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute adminOnly={true}>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-        </Routes>
+        ))}
       </div>
-    </Router>
+    </div>
   );
 }
+
+export default Dashboard;
