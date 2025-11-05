@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Admin from "./pages/Admin";
-import History from "./pages/History";
+import Login from "./Login";
+import Dashboard from "./Dashboard";
+import Admin from "./Admin";
+import History from "./History";
 import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
 import Header from "./components/Header";
 
