@@ -4,7 +4,7 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Admin from "./Admin";
 import History from "./History";
-import { getCurrentUser, clearCurrentUser } from "./utils/store.js";
+import { getCurrentUser, clearCurrentUser } from "../utils/store.js";
 import Header from "./components/Header";
 
 export default function App() {
