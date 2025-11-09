@@ -102,7 +102,29 @@ useEffect(() => {
 }, [user?.token, user?.is_admin, API_BASE_URL]); // ✅ Specific dependencies
 
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Get session token
+    const sessionToken = localStorage.getItem("session_token");
+    
+    // Call backend to remove session
+    if (sessionToken) {
+      try {
+        await fetch(`${API_BASE_URL}/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            token: sessionToken,
+          }),
+        });
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    
+    // Clear local storage
+    localStorage.removeItem("session_token");
     clearCurrentUser();
     setUser(null);
   };
