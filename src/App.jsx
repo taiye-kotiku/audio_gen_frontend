@@ -52,12 +52,12 @@ useEffect(() => {
 // === Poll active users count (Admin Only) - FIXED ===
 useEffect(() => {
     console.log("📊 Polling effect triggered. User:", user);
-    
+
     // More specific check for admin status
     if (!user || !user.token || user.is_admin !== true) {
       console.log("⛔ Stopping poll - User is not admin or no token");
-      setActiveUsers(0); 
-      return; 
+      setActiveUsers(0);
+      return;
     }
 
     console.log("✅ User is admin, starting polling...");
@@ -68,9 +68,9 @@ useEffect(() => {
         const res = await fetch(`${API_BASE_URL}/admin/active-users/`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        
+
         console.log("📥 Response status:", res.status);
-        
+
         if (res.ok) {
           const data = await res.json();
           console.log("✅ Active users data:", data);
@@ -88,18 +88,19 @@ useEffect(() => {
       }
     };
 
-    // Immediate first call
-    fetchActiveUsers();
-    
-    // Set up interval
+    // Delay first call by 500ms to ensure heartbeat registers first
+    const timeoutId = setTimeout(fetchActiveUsers, 500);
+
+    // Set up interval for subsequent polls
     const pollingInterval = setInterval(fetchActiveUsers, 10000);
-    
+
     // Cleanup
     return () => {
-      console.log("🧹 Cleaning up polling interval");
+      console.log("🧹 Cleaning up polling interval and timeout");
+      clearTimeout(timeoutId);
       clearInterval(pollingInterval);
     };
-}, [user?.token, user?.is_admin, API_BASE_URL]); // ✅ Specific dependencies
+}, [user, API_BASE_URL]); // ✅ Watch entire user object for proper re-triggering
 
 
   const handleLogout = async () => {
